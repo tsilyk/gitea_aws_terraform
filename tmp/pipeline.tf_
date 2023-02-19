@@ -1,0 +1,91 @@
+resource "aws_codepipeline" "codepipeline" {
+  name     = "gitea-pipeline"
+  role_arn = aws_iam_role.giteapipeline.arn
+
+  artifact_store {
+    location = aws_s3_bucket.gitea.bucket
+    type     = "S3"
+    acl      = "private"
+
+    /*encryption_key {
+      id   = data.aws_kms_alias.s3kmskey.arn
+      type = "KMS"
+    }*/
+  }
+
+  stage {
+    name = "Source"
+
+    action {
+      name             = "Source"
+      category         = "Source"
+      owner            = "ThirdParty"
+      provider         = "GitHub"
+      version          = "2"
+      output_artifacts = ["gitea"]
+
+      configuration = {
+        Owner  = "tsilyk"
+        Repo   = "tsilyk/gitea"
+        Branch = "main"
+      }
+    }
+  }
+
+  stage {
+    name = "Build"
+
+    action {
+      name            = "Build"
+      category        = "Build"
+      owner           = "AWS"
+      provider        = "CodeBuild"
+      input_artifacts = ["gitea"]
+      version         = "1"
+
+      configuration = {
+        ProjectName = "gitea-build"
+      }
+    }
+  }
+}
+
+# A shared secret between GitHub and AWS that allows AWS
+# CodePipeline to authenticate the request came from GitHub.
+# Would probably be better to pull this from the environment
+# or something like SSM Parameter Store.
+locals {
+  webhook_secret = "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"
+}
+
+resource "aws_codepipeline_webhook" "bar" {
+  name            = "test-webhook-github-bar"
+  authentication  = "GITHUB_HMAC"
+  target_action   = "Source"
+  target_pipeline = aws_codepipeline.bar.name
+
+  authentication_configuration {
+    secret_token = local.webhook_secret
+  }
+
+  filter {
+    json_path    = "$.ref"
+    match_equals = "refs/heads/{Branch}"
+  }
+}
+
+# Wire the CodePipeline webhook into a GitHub repository.
+/*resource "github_repository_webhook" "gitea" {
+  repository = github_repository.repo.name
+
+  name = "web"
+
+  configuration {
+    url          = aws_codepipeline_webhook.bar.url
+    content_type = "json"
+    insecure_ssl = true
+    secret       = local.webhook_secret
+  }
+
+  events = ["push"]
+}*/
