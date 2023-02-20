@@ -29,10 +29,6 @@ resource "aws_codebuild_project" "CodeBuild_Project" {
     }
 }
 
-output "codebuild_project_name" {
-  value = var.codebuild_project_name
-}
-
 resource "aws_kms_key" "codebuild" {
     description              = "Default master key that protects my S3 objects when no other key is defined"
     enable_key_rotation      = true
@@ -129,7 +125,7 @@ resource "aws_iam_role" "codebuildrole" {
                         ]
                         Effect   = "Allow"
                         Resource = [
-                            "arn:aws:s3:::codepipeline-eu-central-1-*",
+                            "arn:aws:s3:::${var.s3_bucket_name}",
                         ]
                     },
                     {

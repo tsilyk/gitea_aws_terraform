@@ -1,3 +1,4 @@
 variable "codebuild_project_name" {
-  description = "Gitea CodeBuild Project"
+  description = "Default CodeBuild Project"
 }
+ variable "s3_bucket_name" {}

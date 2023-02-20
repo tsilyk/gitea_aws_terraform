@@ -1,11 +1,3 @@
-/*provider "aws" {
-  region = "eu-central-1"
-}
-
-module "gitea" {
-  source = "github.com/tsilyk/gitea"
-}*/
-
 # Create elastic beanstalk application
 resource "aws_elastic_beanstalk_application" "elasticapp" {
   name = var.elasticapp
@@ -33,7 +25,6 @@ resource "aws_elastic_beanstalk_environment" "beanstalkappenv" {
     name      = "AssociatePublicIpAddress"
     value     =  "True"
   }
- 
   setting {
     namespace = "aws:ec2:vpc"
     name      = "Subnets"
@@ -52,7 +43,7 @@ resource "aws_elastic_beanstalk_environment" "beanstalkappenv" {
   setting {
     namespace = "aws:autoscaling:launchconfiguration"
     name      = "InstanceType"
-    value     = "t2.micro"
+    value     = var.instance
   }
   setting {
     namespace = "aws:ec2:vpc"
@@ -62,12 +53,12 @@ resource "aws_elastic_beanstalk_environment" "beanstalkappenv" {
   setting {
     namespace = "aws:autoscaling:asg"
     name      = "MinSize"
-    value     = 1
+    value     = var.autoscaling_min
   }
   setting {
     namespace = "aws:autoscaling:asg"
     name      = "MaxSize"
-    value     = 1
+    value     = var.autoscaling_max
   }
   setting {
     namespace = "aws:elasticbeanstalk:healthreporting:system"
@@ -78,13 +69,11 @@ resource "aws_elastic_beanstalk_environment" "beanstalkappenv" {
     namespace = "aws:autoscaling:launchconfiguration"
     name      = "EC2KeyName"
     value     = var.keypair
-
   }
 }
 
 
 /*
- resource "aws_elastic_beanstalk_application" "gitea" {
    name        = "gitea-app"
    description = "Gitea Application"
  }
