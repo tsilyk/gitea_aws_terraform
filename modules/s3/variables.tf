@@ -1,2 +1,2 @@
 variable "region" {}
-variable "app" {}
+variable "env_app" {}

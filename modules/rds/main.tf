@@ -22,7 +22,7 @@ resource "aws_ssm_parameter" "rds_password" {
 
 // Gitea RDS MariaDB database
 resource "aws_db_instance" "app_database" {
-  identifier            = "${var.app}-mariadb"
+  identifier            = "${var.env_app}-mariadb"
   allocated_storage     = 20
   storage_type          = "gp2"
   engine                = "MariaDB"
@@ -43,12 +43,12 @@ resource "aws_db_instance" "app_database" {
 resource "aws_db_subnet_group" "app_database" {
   subnet_ids = var.database_subnets
   tags = {
-    Name = "${var.app}-subnet-group"
+    Name = "${var.env_app}-subnet-group"
   }
 }
 
 resource "aws_db_parameter_group" "app_database" {
-  name   = "${var.app}-parameter-group"
+  name   = "${var.env_app}-parameter-group"
   family = "mariadb10.6"
   parameter {
     name  = "character_set_server"
@@ -61,13 +61,13 @@ resource "aws_db_parameter_group" "app_database" {
 }
 
 resource "aws_security_group" "app_database" {
-  name   = "rds-${var.app}-db-sg"
+  name   = "rds-${var.env_app}-db-sg"
   vpc_id = var.vpc_id
   ingress {
     from_port   = 3306
     to_port     = 3306
     protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
+    cidr_blocks = var.sg_ingress_database_subnets
   }
   egress {
     from_port   = 0

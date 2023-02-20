@@ -23,7 +23,6 @@ data "aws_iam_policy_document" "cp_assume_role_policy" {
   }
 }
 
-
 resource "aws_iam_role_policy" "codepipelinerole_policy" {
   name = "CodepipelineRole-Policy"
   role = aws_iam_role.codepipeline.id
@@ -151,6 +150,5 @@ resource "aws_iam_role_policy" "codepipelinerole_policy" {
 }
 EOF
 }
-
 
 data "aws_caller_identity" "default" {}

@@ -5,3 +5,7 @@ variable "region" {
 variable "app" {
   default = "gitea"
 }
+
+variable "env" {
+  default = "dev"
+}
