@@ -70,12 +70,18 @@ resource "aws_elastic_beanstalk_environment" "beanstalkappenv" {
     name      = "EC2KeyName"
     value     = var.keypair
   }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "ENV1"
+    value     = "VALUE1"
+  }
+
 }
 
 
 /*
-   name        = "gitea-app"
-   description = "Gitea Application"
+ name        = "gitea-app"
+ description = "Gitea Application"
  }
 
  resource "aws_elastic_beanstalk_environment" "gitea" {
