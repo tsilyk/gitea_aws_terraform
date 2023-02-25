@@ -2,7 +2,7 @@
 resource "random_string" "rds_password" {
   length           = 12
   special          = true
-  override_special = "*%#@!#$&"
+  override_special = "@"
 }
 
 // Store Password in SSM Parameter Store

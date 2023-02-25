@@ -18,21 +18,25 @@ terraform {
   }
 }
 
+locals {
+  env_app = "${var.env}-${var.app}"
+}
+
 module "codepipeline" {
    source                  = "../modules/codepipeline"
    repository              = "tsilyk/${var.app}"
-   name                    = "${var.env}-${var.app}-pipeline"
+   name                    = "${local.env_app}-pipeline"
    codebuild_project_name  = module.codebuild.codebuild_project_name
    s3_bucket_name          = module.s3.s3_bucket
    iam_role_arn            = module.iam.role_arn
    codestar_connection_arn = module.codestar_connection.codestar_arn
-   elasticapp              = "${var.app}-app"
-   beanstalkappenv         = "${var.env}-${var.app}-env"
+   elasticapp              = "${local.env_app}-app"
+   beanstalkappenv         = "${local.env_app}-env"
  }
 
 module "codebuild" {
   source                 = "../modules/codebuild"
-  codebuild_project_name = "${var.env}-${var.app}-proj"
+  codebuild_project_name = "${local.env_app}-proj"
   s3_bucket_name         = module.s3.s3_bucket
 }
 
@@ -47,23 +51,32 @@ module "iam" {
 module "s3" {
   source  = "../modules/s3"
   region  = var.region
-  env_app = "${var.env}-${var.app}"
+  env_app = "${local.env_app}"
 }
 
 module "beanstalk" {
   source           = "../modules/beanstalk"
   public_subnets   = module.vpc-gitea-dev.public_subnet_ids
   vpc_id           = module.vpc-gitea-dev.vpc_id
-  elasticapp       = "${var.app}-app"
-  beanstalkappenv  = "${var.app}-env"
+  elasticapp       = "${local.env_app}-app"
+  beanstalkappenv  = "${local.env_app}-env"
   instance         = "t2.micro"
   autoscaling_min  = 1
   autoscaling_max  = 1
+  efs_dns_name     = module.efs.dns_name
+  root_url         = "http://dev-gitea.aws.eq.org.ua/"
+  rds_host         = module.rds.rds_hostname
+  rds_user         = module.rds.rds_username
+  rds_password     = module.ssm.ssm_rds_password
+  rds_db_name      = module.rds.rds_db_name
+  internal_token   = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYmYiOjE2NzcwNzU2Nzd9.cBFlYPDgZQNJd5wDYFAa_Sp_GEY6U-nooAvsfRWT4sI"
+  secret_key       = "mDgQaX3xau4a6bBIMLeTESgwhBNTurDjotJbyznee0UKD7SBpVP2Plhtg4jMHfOH"
+  lfs_jwt_secret   = "8yEmrJbE7iKQzXEwU1QlZgZZAw4WwwTzQv7pn_NV-K8"
 }
 
 module "vpc-gitea-dev" {
   source                = "../modules/vpc"
-  env_app               = "${var.env}-${var.app}"
+  env_app               = "${local.env_app}"
   vpc_cidr              = "10.0.0.0/16"
   public_subnet_cidrs   = var.public_subnet_cidrs
   private_subnet_cidrs  = []
@@ -78,7 +91,7 @@ module "rds" {
   source                      = "../modules/rds"
   rds_password                = module.ssm.ssm_rds_password
   database_subnets            = module.vpc-gitea-dev.isolated_subnet_ids
-  env_app                     = "${var.env}-${var.app}"
+  env_app                     = "${local.env_app}"
   vpc_id                      = module.vpc-gitea-dev.vpc_id
   sg_ingress_database_subnets = var.public_subnet_cidrs
 }
@@ -86,7 +99,7 @@ module "rds" {
 module "efs" {
   source = "../modules/efs"
   vpc_id                 = module.vpc-gitea-dev.vpc_id
-  name                   = "${var.env}-${var.app}-efs"
+  name                   = "${local.env_app}-efs"
   subnet_ids             = module.vpc-gitea-dev.isolated_subnet_ids
   security_group_ingress = {
     default = {
@@ -102,3 +115,36 @@ module "efs" {
     "transition_to_ia" = "AFTER_30_DAYS"
   }]
 }
+
+module "route53" {
+  source = "../modules/route53"
+  zone_name = "aws.eq.org.ua."
+  sub_zone  = "${var.app}"
+  cname  = module.beanstalk.beanstalk_cname
+}
+
+output "efs_dns_name" {
+  value       = module.efs.dns_name
+  description = "EFS DNS name"
+}
+
+output "rds_hostname" {
+  description = "RDS instance hostname"
+  value       = module.rds.rds_hostname
+  sensitive   = true
+}
+
+output "beanstalk_endpoint_url" {
+  description = "The URL to the Load Balancer for this Environment"
+  value       = module.beanstalk.beanstalk_endpoint_url
+}
+
+output "beanstalk_cname" {
+  description = "Fully qualified DNS name for this Environment"
+  value       = module.beanstalk.beanstalk_cname
+}
+output "beanstalk_launch_configurations" {
+  description = "Launch configurations in use by this Environment"
+  value       = module.beanstalk.beanstalk_launch_configurations
+}
+
