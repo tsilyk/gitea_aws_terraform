@@ -27,9 +27,9 @@ resource "aws_codepipeline" "pipeline" {
   }
 
   stage {
-    name = "Build"
+    name = "Build_and_Tests"
     action {
-      name             = "Build"
+      name             = "Build_and_Tests"
       category         = "Build"
       owner            = "AWS"
       provider         = "CodeBuild"

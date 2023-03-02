@@ -1,13 +1,19 @@
 variable "region" {
-  default = "eu-central-1"
+  description = "Default AWS region"
+  type        = string
+  default     = "eu-central-1"
 }
 
 variable "app" {
-  default = "gitea"
+  description = "Name of application"
+  type        = string
+  default     = "gitea"
 }
 
 variable "env" {
-  default = "dev"
+  description = "Name of application"
+  type        = string
+  default     = "dev"
 }
 
 variable "public_subnet_cidrs" {

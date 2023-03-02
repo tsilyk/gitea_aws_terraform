@@ -60,13 +60,13 @@ variable "rds_db_name" {
 }
 variable "secret_key" {
   description = "Key for encription data in application"
-  default     = ""
+  default     = "mDgQaX3xau4a6bBIMLeTESgwhBNTurDjotJbyznee0UKD7SBpVP2Plhtg4jMHfOH"
 }
 variable "lfs_jwt_secret" {
   description = "Lage file system secret key"
-  default     = ""
+  default     = "8yEmrJbE7iKQzXEwU1QlZgZZAw4WwwTzQv7pn_NV-K8"
 }
 variable "internal_token" {
   description = "Internal Token"
-  default     = ""
+  default     = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYmYiOjE2NzcwNzU2Nzd9.cBFlYPDgZQNJd5wDYFAa_Sp_GEY6U-nooAvsfRWT4sI"
 }

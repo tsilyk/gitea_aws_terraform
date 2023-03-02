@@ -64,14 +64,11 @@ module "beanstalk" {
   autoscaling_min  = 1
   autoscaling_max  = 1
   efs_dns_name     = module.efs.dns_name
-  root_url         = "http://dev-gitea.aws.eq.org.ua/"
+  root_url         = "https://${var.app}.aws.eq.org.ua/"
   rds_host         = module.rds.rds_hostname
   rds_user         = module.rds.rds_username
   rds_password     = module.ssm.ssm_rds_password
   rds_db_name      = module.rds.rds_db_name
-  internal_token   = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYmYiOjE2NzcwNzU2Nzd9.cBFlYPDgZQNJd5wDYFAa_Sp_GEY6U-nooAvsfRWT4sI"
-  secret_key       = "mDgQaX3xau4a6bBIMLeTESgwhBNTurDjotJbyznee0UKD7SBpVP2Plhtg4jMHfOH"
-  lfs_jwt_secret   = "8yEmrJbE7iKQzXEwU1QlZgZZAw4WwwTzQv7pn_NV-K8"
 }
 
 module "vpc-gitea-dev" {
@@ -122,29 +119,3 @@ module "route53" {
   sub_zone  = "${var.app}"
   cname  = module.beanstalk.beanstalk_cname
 }
-
-output "efs_dns_name" {
-  value       = module.efs.dns_name
-  description = "EFS DNS name"
-}
-
-output "rds_hostname" {
-  description = "RDS instance hostname"
-  value       = module.rds.rds_hostname
-  sensitive   = true
-}
-
-output "beanstalk_endpoint_url" {
-  description = "The URL to the Load Balancer for this Environment"
-  value       = module.beanstalk.beanstalk_endpoint_url
-}
-
-output "beanstalk_cname" {
-  description = "Fully qualified DNS name for this Environment"
-  value       = module.beanstalk.beanstalk_cname
-}
-output "beanstalk_launch_configurations" {
-  description = "Launch configurations in use by this Environment"
-  value       = module.beanstalk.beanstalk_launch_configurations
-}
-
